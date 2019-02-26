@@ -1,3 +1,4 @@
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroKey;
@@ -15,7 +16,15 @@ import java.io.IOException;
  */
 public class AvroMapper extends Mapper<LongWritable,Text,AvroKey<GenericRecord>,AvroValue<GenericRecord>> {
     private RecordParser parser = new RecordParser();
-    private GenericRecord record = new GenericData.Record(AvroSchemas.SCHEMA);
+//    private GenericRecord record = new GenericData.Record(AvroSchemas.SCHEMA);
+    private AvroSchemas schema;
+    private GenericRecord record;
+
+    public AvroMapper() throws IOException {
+        schema =new AvroSchemas();
+        record = new GenericData.Record(schema.getCurrentSchema());
+    }
+
     /**
      * Called once for each key/value pair in the input split. Most applications
      * should override this, but the default is the identity function.
@@ -26,6 +35,7 @@ public class AvroMapper extends Mapper<LongWritable,Text,AvroKey<GenericRecord>,
      */
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+
         parser.parse(value.toString());
         if(parser.isValid()){
             record.put("year",parser.getYear());
